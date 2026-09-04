@@ -1,0 +1,38 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // One profile doc per user (role, display name, email). See
+    // src/lib/firebase/user-profile.ts.
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // One doc per (worker, job) application, doc id `${workerUid}_${jobId}`.
+    // A worker can create/read only their own applications; there's no
+    // update/delete yet since the only status today is 'applied'. See
+    // src/lib/firebase/applications.ts.
+    match /applications/{applicationId} {
+      allow get: if request.auth != null && (
+        applicationId.matches(request.auth.uid + '_.*') ||
+        (resource != null && resource.data.employerUid == request.auth.uid)
+      );
+      allow list: if request.auth != null && (
+        resource.data.workerUid == request.auth.uid ||
+        resource.data.employerUid == request.auth.uid
+      );
+      allow create: if request.auth != null && request.resource.data.workerUid == request.auth.uid;
+    }
+
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.employerUid == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.employerUid == request.auth.uid;
+    }
+
+    match /workerProfiles/{uid} {
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
