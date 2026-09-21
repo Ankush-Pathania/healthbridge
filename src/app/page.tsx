@@ -1,86 +1,56 @@
 import Link from 'next/link';
 import Container from '@/components/ui/Container';
-import JobSearch from '@/components/jobs/JobSearch';
+import Hero from '@/components/home/Hero';
+import QuickActions from '@/components/home/QuickActions';
+import CategoryPills from '@/components/home/CategoryPills';
+import StatsAndTestimonial from '@/components/home/StatsAndTestimonial';
 import JobsBoard from '@/components/jobs/JobsBoard';
 import EmployerCTA from '@/components/employers/EmployerCTA';
 import WorkerCTA from '@/components/workers/WorkerCTA';
+import PricingSection from '@/components/pricing/PricingSection';
 import CategoryIcon from '@/components/icons/CategoryIcons';
 import { MapPinIcon, SearchIcon, FileSendIcon, CheckCircleIcon } from '@/components/icons/UtilityIcons';
-import { JOB_CATEGORIES, POPULAR_LOCATIONS, PROVINCES } from '@/lib/constants';
+import { JOB_CATEGORIES, POPULAR_LOCATIONS, CATEGORY_ACCENT, type CategoryAccent } from '@/lib/constants';
 
-const HOW_IT_WORKS = [
+const ACCENT_CARD_STYLES: Record<CategoryAccent, { chip: string }> = {
+  yellow: { chip: 'bg-[var(--color-pastel-yellow)] text-[var(--color-pastel-yellow-fg)]' },
+  green: { chip: 'bg-[var(--color-pastel-green)] text-[var(--color-pastel-green-fg)]' },
+  pink: { chip: 'bg-[var(--color-pastel-pink)] text-[var(--color-pastel-pink-fg)]' },
+  blue: { chip: 'bg-[var(--color-pastel-blue)] text-[var(--color-pastel-blue-fg)]' },
+};
+
+const LOCATION_ACCENTS: CategoryAccent[] = ['blue', 'pink', 'green', 'yellow'];
+
+const HOW_IT_WORKS: { step: string; title: string; description: string; icon: typeof SearchIcon; accent: CategoryAccent }[] = [
   {
     step: '1',
     title: 'Search Jobs',
     description: 'Browse healthcare positions by category, location, or keyword across Canada.',
     icon: SearchIcon,
+    accent: 'blue',
   },
   {
     step: '2',
     title: 'Apply Online',
     description: 'Submit your application directly to employers with your profile and resume.',
     icon: FileSendIcon,
+    accent: 'pink',
   },
   {
     step: '3',
     title: 'Start Working',
     description: 'Get hired and begin your next healthcare role with a trusted employer.',
     icon: CheckCircleIcon,
+    accent: 'green',
   },
 ];
 
 export default function HomePage() {
-  const stats = [
-    { label: 'Live job posts', value: 'New' },
-    { label: 'Worker categories', value: JOB_CATEGORIES.length },
-    { label: 'Provinces covered', value: PROVINCES.length },
-  ];
-
   return (
     <>
-      {/* ===== Hero Section ===== */}
-      <section className="relative overflow-hidden bg-[var(--color-bg-subtle)] py-16 sm:py-20">
-        {/* Decorative background pattern */}
-        <div className="pointer-events-none absolute inset-0 -z-0" aria-hidden="true">
-          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-[var(--color-primary-light)] opacity-70 blur-2xl" />
-          <div className="absolute -bottom-32 -left-16 w-72 h-72 rounded-full bg-[var(--color-accent-light)] opacity-70 blur-2xl" />
-          <svg
-            className="absolute inset-0 w-full h-full opacity-[0.35]"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <pattern id="hero-dots" width="24" height="24" patternUnits="userSpaceOnUse">
-                <circle cx="1.5" cy="1.5" r="1.5" fill="var(--color-border-strong)" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#hero-dots)" />
-          </svg>
-        </div>
+      <Hero />
 
-        <Container size="narrow" className="relative">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-text)] mb-3 leading-tight">
-              Find Healthcare Jobs Across Canada
-            </h1>
-            <p className="text-lg text-[var(--color-text-secondary)] max-w-xl mx-auto">
-              Browse thousands of nursing, PSW, caregiver, and healthcare assistant positions.
-            </p>
-          </div>
-          <div className="flex justify-center">
-            <JobSearch />
-          </div>
-
-          {/* Trust stats */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-2xl font-bold text-[var(--color-primary)]">{stat.value}</p>
-                <p className="text-sm text-[var(--color-text-secondary)]">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
+      <QuickActions />
 
       {/* ===== Featured Jobs ===== */}
       <section className="py-12 sm:py-16">
@@ -96,6 +66,9 @@ export default function HomePage() {
               View All Jobs →
             </Link>
           </div>
+          <div className="mb-6">
+            <CategoryPills />
+          </div>
           <JobsBoard title="Latest posts" limit={6} showFilters={false} showCount={false} />
           <div className="mt-6 text-center sm:hidden">
             <Link
@@ -109,7 +82,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== Browse by Category ===== */}
-      <section className="py-12 sm:py-16 bg-[var(--color-bg-subtle)] border-y border-[var(--color-border)]">
+      <section className="py-12 sm:py-16 bg-[var(--color-bg-subtle)]">
         <Container>
           <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-6 text-center">
             Browse by Category
@@ -119,9 +92,11 @@ export default function HomePage() {
               <Link
                 key={cat.slug}
                 href={`/jobs?category=${cat.slug}`}
-                className="flex gap-3.5 p-4 bg-white border border-[var(--color-border)] rounded-[var(--radius-lg)] hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-sm)] transition-all no-underline"
+                className="flex gap-3.5 p-4 bg-white border border-[var(--color-border)] rounded-[var(--radius-xl)] hover:shadow-[var(--shadow-xl)] hover:-translate-y-0.5 transition-all no-underline"
               >
-                <div className="flex-shrink-0 w-11 h-11 rounded-[var(--radius-md)] bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] flex items-center justify-center">
+                <div
+                  className={`flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center ${ACCENT_CARD_STYLES[CATEGORY_ACCENT[cat.slug]].chip}`}
+                >
                   <CategoryIcon category={cat.slug} size={22} />
                 </div>
                 <div>
@@ -150,9 +125,11 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             {HOW_IT_WORKS.map((item) => (
               <div key={item.step} className="text-center">
-                <div className="relative w-14 h-14 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] flex items-center justify-center mx-auto mb-3">
+                <div
+                  className={`relative w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 ${ACCENT_CARD_STYLES[item.accent].chip}`}
+                >
                   <item.icon size={26} />
-                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--color-primary)] text-[var(--color-text-inverse)] flex items-center justify-center text-xs font-bold">
+                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-xs font-bold">
                     {item.step}
                   </span>
                 </div>
@@ -168,28 +145,51 @@ export default function HomePage() {
         </Container>
       </section>
 
+      {/* ===== Stats & Testimonial ===== */}
+      <StatsAndTestimonial />
+
+      {/* ===== Pricing ===== */}
+      <section className="py-12 sm:py-16">
+        <Container>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-2">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-[var(--color-text-secondary)] max-w-lg mx-auto">
+              Unlock full job details as a worker, or post unlimited jobs as an employer.
+            </p>
+          </div>
+          <PricingSection />
+        </Container>
+      </section>
+
       {/* ===== Popular Locations ===== */}
-      <section className="py-12 sm:py-16 bg-[var(--color-bg-subtle)] border-y border-[var(--color-border)]">
+      <section className="py-12 sm:py-16 bg-[var(--color-bg-subtle)]">
         <Container>
           <h2 className="text-2xl font-semibold text-[var(--color-text)] mb-6 text-center">
             Healthcare Jobs by Location
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {POPULAR_LOCATIONS.map((loc) => (
-              <Link
-                key={loc.slug}
-                href={loc.slug}
-                className="flex flex-col items-center gap-1.5 p-3 bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-sm)] transition-all no-underline text-center"
-              >
-                <MapPinIcon size={18} className="text-[var(--color-primary)]" />
-                <span className="text-sm font-medium text-[var(--color-text)]">
-                  {loc.city}
-                </span>
-                <span className="block text-xs text-[var(--color-text-secondary)]">
-                  {loc.province}
-                </span>
-              </Link>
-            ))}
+            {POPULAR_LOCATIONS.map((loc, index) => {
+              const accent = LOCATION_ACCENTS[index % LOCATION_ACCENTS.length];
+              return (
+                <Link
+                  key={loc.slug}
+                  href={loc.slug}
+                  className="flex flex-col items-center gap-1.5 p-4 bg-white border border-[var(--color-border)] rounded-[var(--radius-lg)] hover:shadow-[var(--shadow-xl)] hover:-translate-y-0.5 transition-all no-underline text-center"
+                >
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center ${ACCENT_CARD_STYLES[accent].chip}`}>
+                    <MapPinIcon size={16} />
+                  </div>
+                  <span className="text-sm font-medium text-[var(--color-text)]">
+                    {loc.city}
+                  </span>
+                  <span className="block text-xs text-[var(--color-text-secondary)]">
+                    {loc.province}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
           <div className="mt-4 text-center">
             <Link

@@ -42,17 +42,31 @@ export default function WorkerProfileCard({ uid }: { uid: string }) {
 
       {profile && (
         <div className="p-4 bg-white border border-[var(--color-border)] rounded-[var(--radius-lg)]">
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <p className="font-medium text-[var(--color-text)]">{profile.headline}</p>
-            <Badge variant={profile.availableForWork ? 'success' : 'default'}>
-              {profile.availableForWork ? 'Available' : 'Not available'}
-            </Badge>
+          <div className="flex items-start gap-3">
+            <div className="w-12 h-12 rounded-full bg-[var(--color-primary-light)] overflow-hidden flex-shrink-0 flex items-center justify-center">
+              {profile.photoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={profile.photoUrl} alt={profile.displayName} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-lg font-semibold text-[var(--color-primary-dark)]">
+                  {profile.displayName.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <p className="font-medium text-[var(--color-text)]">{profile.headline}</p>
+                <Badge variant={profile.availableForWork ? 'success' : 'default'}>
+                  {profile.availableForWork ? 'Available' : 'Not available'}
+                </Badge>
+              </div>
+              <p className="text-sm text-[var(--color-text-secondary)] mb-2">
+                {JOB_CATEGORIES.find((cat) => cat.slug === profile.category)?.label} · {profile.location.city},{' '}
+                {profile.location.provinceCode}
+              </p>
+              <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">{profile.summary}</p>
+            </div>
           </div>
-          <p className="text-sm text-[var(--color-text-secondary)] mb-2">
-            {JOB_CATEGORIES.find((cat) => cat.slug === profile.category)?.label} · {profile.location.city},{' '}
-            {profile.location.provinceCode}
-          </p>
-          <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">{profile.summary}</p>
         </div>
       )}
     </div>

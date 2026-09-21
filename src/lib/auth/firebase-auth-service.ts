@@ -12,6 +12,7 @@ import {
 import { FirebaseError } from 'firebase/app';
 import { auth } from '@/lib/firebase/config';
 import { createUserProfile, getUserProfile } from '@/lib/firebase/user-profile';
+import { getWorkerProfile } from '@/lib/firebase/worker-profiles';
 import {
   AuthError,
   type AuthService,
@@ -62,11 +63,17 @@ async function toAuthUser(firebaseUser: FirebaseUser, fallbackRole?: UserRole): 
     await createUserProfile(firebaseUser.uid, profile);
   }
 
+  const photoUrl =
+    profile.role === 'worker'
+      ? (await getWorkerProfile(firebaseUser.uid).catch(() => null))?.photoUrl
+      : undefined;
+
   return {
     uid: firebaseUser.uid,
     email: profile.email,
     displayName: profile.displayName,
     role: profile.role,
+    photoUrl,
   };
 }
 
@@ -135,6 +142,12 @@ class FirebaseAuthService implements AuthService {
       if (err instanceof FirebaseError && err.code === 'auth/user-not-found') return;
       throw toAuthError(err);
     }
+  }
+
+  async refreshUser(): Promise<AuthUser | null> {
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser) return null;
+    return toAuthUser(firebaseUser);
   }
 }
 

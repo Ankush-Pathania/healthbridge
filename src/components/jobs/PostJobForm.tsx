@@ -1,14 +1,17 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/lib/auth/auth-context';
-import { createJob } from '@/lib/firebase/jobs';
+import { createJob, getEmployerJobCount } from '@/lib/firebase/jobs';
+import { useSubscription, isEmployerSubscribed } from '@/lib/subscription/subscription-context';
 import { JOB_CATEGORIES, JOB_TYPE_LABELS, PROVINCES, SHIFT_TYPE_LABELS } from '@/lib/constants';
 import type { JobCategory, JobType, SalaryPeriod, ShiftType } from '@/types/job';
+
+const FREE_TIER_JOB_LIMIT = 1;
 
 function splitLines(value: string): string[] {
   return value
@@ -19,7 +22,11 @@ function splitLines(value: string): string[] {
 
 export default function PostJobForm() {
   const { user } = useAuth();
+  const { subscription } = useSubscription();
   const router = useRouter();
+  const subscribed = isEmployerSubscribed(subscription);
+
+  const [jobCount, setJobCount] = useState<number | null>(null);
 
   const [title, setTitle] = useState('');
   const [employerName, setEmployerName] = useState(user?.displayName ?? '');
@@ -43,6 +50,15 @@ export default function PostJobForm() {
     [provinceSlug]
   );
 
+  useEffect(() => {
+    if (!user) return;
+    getEmployerJobCount(user.uid)
+      .then(setJobCount)
+      .catch(() => setJobCount(0));
+  }, [user]);
+
+  const atFreeTierLimit = !subscribed && jobCount !== null && jobCount >= FREE_TIER_JOB_LIMIT;
+
   function handleProvinceChange(nextSlug: string) {
     const next = PROVINCES.find((item) => item.slug === nextSlug) ?? PROVINCES[0];
     setProvinceSlug(next.slug);
@@ -52,6 +68,11 @@ export default function PostJobForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
+
+    if (atFreeTierLimit) {
+      setError('You’ve used your free job post. Subscribe to post unlimited jobs.');
+      return;
+    }
 
     if (!title.trim() || !employerName.trim() || !description.trim()) {
       setError('Add a job title, employer name, and description.');
@@ -93,6 +114,22 @@ export default function PostJobForm() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (atFreeTierLimit) {
+    return (
+      <div className="p-6 bg-[var(--color-pastel-green)] rounded-[var(--radius-xl)] text-center">
+        <h2 className="text-lg font-semibold text-[var(--color-pastel-green-fg)] mb-2">
+          You&apos;ve used your free job post
+        </h2>
+        <p className="text-sm text-[var(--color-pastel-green-fg)] opacity-80 mb-5">
+          Subscribe to post unlimited jobs and get featured placement for your listings.
+        </p>
+        <Button href="/pricing" variant="primary" size="lg">
+          View Employer Plans →
+        </Button>
+      </div>
+    );
   }
 
   return (

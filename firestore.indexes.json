@@ -7,6 +7,14 @@
         { "fieldPath": "workerUid", "order": "ASCENDING" },
         { "fieldPath": "appliedAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "applications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "employerUid", "order": "ASCENDING" },
+        { "fieldPath": "appliedAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

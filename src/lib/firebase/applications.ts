@@ -7,10 +7,11 @@ import {
   serverTimestamp,
   setDoc,
   Timestamp,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { db } from './config';
-import type { JobApplication } from '@/types/application';
+import type { JobApplication, ApplicationStatus } from '@/types/application';
 import type { Job } from '@/types/job';
 
 /**
@@ -101,6 +102,8 @@ export async function getEmployerApplications(employerUid: string): Promise<JobA
       const data = docSnap.data();
       const appliedAt =
         data.appliedAt instanceof Timestamp ? data.appliedAt.toDate().toISOString() : new Date().toISOString();
+      const updatedAt =
+        data.updatedAt instanceof Timestamp ? data.updatedAt.toDate().toISOString() : data.updatedAt;
 
       return {
         id: docSnap.id,
@@ -114,7 +117,27 @@ export async function getEmployerApplications(employerUid: string): Promise<JobA
         employerName: data.employerName,
         status: data.status,
         appliedAt,
+        updatedAt,
+        employerNote: data.employerNote,
       };
     })
     .sort((a, b) => b.appliedAt.localeCompare(a.appliedAt));
+}
+
+/**
+ * Employer-side: change the status of an application (shortlist / approve / reject).
+ * Firestore rules enforce that only the employer who owns the job can call this,
+ * and that only the three mutable fields can be touched.
+ */
+export async function updateApplicationStatus(
+  applicationId: string,
+  status: ApplicationStatus,
+  employerNote?: string
+): Promise<void> {
+  const ref = doc(db, 'applications', applicationId);
+  await updateDoc(ref, {
+    status,
+    updatedAt: serverTimestamp(),
+    ...(employerNote !== undefined && { employerNote }),
+  });
 }

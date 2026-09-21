@@ -1,6 +1,6 @@
 import { collection, doc, getDoc, getDocs, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from './config';
-import type { WorkerProfile } from '@/types/worker';
+import type { EducationEntry, WorkExperienceEntry, WorkerProfile } from '@/types/worker';
 import type { JobCategory } from '@/types/job';
 
 type ProfileInput = Omit<WorkerProfile, 'id' | 'createdAt' | 'updatedAt'>;
@@ -26,6 +26,10 @@ function profileFromData(id: string, data: Record<string, unknown>): WorkerProfi
     certifications: Array.isArray(data.certifications) ? data.certifications.map(String) : [],
     availableForWork: Boolean(data.availableForWork),
     openToRelocate: Boolean(data.openToRelocate),
+    photoUrl: typeof data.photoUrl === 'string' ? data.photoUrl : undefined,
+    resumeUrl: typeof data.resumeUrl === 'string' ? data.resumeUrl : undefined,
+    education: Array.isArray(data.education) ? (data.education as EducationEntry[]) : [],
+    workExperience: Array.isArray(data.workExperience) ? (data.workExperience as WorkExperienceEntry[]) : [],
     createdAt: toIso(data.createdAt),
     updatedAt: toIso(data.updatedAt),
   };
@@ -39,8 +43,11 @@ export async function getWorkerProfile(uid: string): Promise<WorkerProfile | nul
 export async function saveWorkerProfile(uid: string, profile: ProfileInput): Promise<void> {
   const ref = doc(db, 'workerProfiles', uid);
   const existing = await getDoc(ref);
+  const cleaned = Object.fromEntries(
+    Object.entries(profile).filter(([, value]) => value !== undefined)
+  );
   await setDoc(ref, {
-    ...profile,
+    ...cleaned,
     createdAt: existing.exists() ? existing.data()?.createdAt ?? serverTimestamp() : serverTimestamp(),
     updatedAt: serverTimestamp(),
   });

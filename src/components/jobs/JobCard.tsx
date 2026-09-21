@@ -1,31 +1,46 @@
 import Link from 'next/link';
 import type { Job } from '@/types/job';
 import { formatSalary, formatRelativeDate, cn } from '@/lib/utils';
-import { JOB_TYPE_LABELS, JOB_CATEGORIES } from '@/lib/constants';
+import { JOB_TYPE_LABELS, JOB_CATEGORIES, CATEGORY_ACCENT } from '@/lib/constants';
 import Badge from '@/components/ui/Badge';
 import CategoryIcon from '@/components/icons/CategoryIcons';
 
 interface JobCardProps {
   job: Job;
+  /** True when the viewer must subscribe to see salary/description — everyone except an actively-subscribed worker. */
+  locked?: boolean;
 }
 
-export default function JobCard({ job }: JobCardProps) {
+const ACCENT_CHIP_STYLES: Record<string, string> = {
+  yellow: 'bg-[var(--color-pastel-yellow)] text-[var(--color-pastel-yellow-fg)]',
+  green: 'bg-[var(--color-pastel-green)] text-[var(--color-pastel-green-fg)]',
+  pink: 'bg-[var(--color-pastel-pink)] text-[var(--color-pastel-pink-fg)]',
+  blue: 'bg-[var(--color-pastel-blue)] text-[var(--color-pastel-blue-fg)]',
+};
+
+export default function JobCard({ job, locked = false }: JobCardProps) {
   const categoryLabel =
     JOB_CATEGORIES.find((c) => c.slug === job.category)?.shortLabel || job.category;
   const typeLabel = JOB_TYPE_LABELS[job.type] || job.type;
+  const accent = CATEGORY_ACCENT[job.category];
 
   return (
     <article
       className={cn(
-        'bg-white border border-[var(--color-border)] rounded-[var(--radius-lg)] p-5',
-        'hover:shadow-[var(--shadow-md)] hover:border-[var(--color-border-strong)] transition-all duration-[var(--transition-fast)]',
-        job.featured && 'border-l-3 border-l-[var(--color-primary)]'
+        'bg-white border border-[var(--color-border)] rounded-[var(--radius-xl)] p-5',
+        'hover:shadow-[var(--shadow-xl)] hover:border-[var(--color-border-strong)] transition-all duration-[var(--transition-fast)]',
+        job.featured && 'border-l-4 border-l-[var(--color-accent)]'
       )}
     >
       <div className="flex flex-col gap-3">
         <div className="flex gap-3.5">
           {/* Category icon chip */}
-          <div className="flex-shrink-0 w-10 h-10 rounded-[var(--radius-md)] bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] flex items-center justify-center">
+          <div
+            className={cn(
+              'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center',
+              ACCENT_CHIP_STYLES[accent]
+            )}
+          >
             <CategoryIcon category={job.category} size={20} />
           </div>
 
@@ -33,12 +48,16 @@ export default function JobCard({ job }: JobCardProps) {
             {/* Title */}
             <div className="flex items-start justify-between gap-2">
               <h3 className="text-base font-semibold text-[var(--color-text)] leading-snug">
-                <Link
-                  href={`/jobs/${job.slug}`}
-                  className="hover:text-[var(--color-primary)] no-underline text-[var(--color-text)]"
-                >
-                  {job.title}
-                </Link>
+                {locked ? (
+                  job.title
+                ) : (
+                  <Link
+                    href={`/jobs/${job.slug}`}
+                    className="hover:text-[var(--color-primary)] no-underline text-[var(--color-text)]"
+                  >
+                    {job.title}
+                  </Link>
+                )}
               </h3>
               {job.urgent && <Badge variant="urgent">Urgent</Badge>}
             </div>
@@ -64,10 +83,22 @@ export default function JobCard({ job }: JobCardProps) {
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="default">{typeLabel}</Badge>
               <Badge variant="primary">{categoryLabel}</Badge>
-              <span className="text-sm font-medium text-[var(--color-text)]">
+              <span
+                className={cn(
+                  'text-sm font-medium text-[var(--color-text)]',
+                  locked && 'blur-sm select-none'
+                )}
+                aria-hidden={locked || undefined}
+              >
                 {formatSalary(job.salary)}
               </span>
             </div>
+
+            {locked && (
+              <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed blur-sm select-none pointer-events-none line-clamp-2" aria-hidden="true">
+                {job.description}
+              </p>
+            )}
           </div>
         </div>
 
@@ -76,12 +107,21 @@ export default function JobCard({ job }: JobCardProps) {
           <span className="text-xs text-[var(--color-text-tertiary)]">
             {formatRelativeDate(job.postedAt)}
           </span>
-          <Link
-            href={`/jobs/${job.slug}`}
-            className="text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] no-underline"
-          >
-            View Job →
-          </Link>
+          {locked ? (
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-[var(--color-primary)] bg-[var(--color-pastel-yellow)] hover:bg-[var(--color-pastel-yellow)]/80 no-underline transition-colors"
+            >
+              Subscribe to view →
+            </Link>
+          ) : (
+            <Link
+              href={`/jobs/${job.slug}`}
+              className="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-[var(--color-primary)] bg-[var(--color-bg-muted)] hover:bg-[var(--color-primary-light)] no-underline transition-colors"
+            >
+              View Job →
+            </Link>
+          )}
         </div>
       </div>
     </article>

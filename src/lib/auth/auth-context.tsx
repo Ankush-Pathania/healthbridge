@@ -12,6 +12,7 @@ interface AuthContextValue {
   signInWithGoogle: (role: UserRole) => Promise<AuthUser>;
   signOut: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -32,9 +33,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = useCallback((role: UserRole) => authService.signInWithGoogle(role), []);
   const signOut = useCallback(() => authService.signOutUser(), []);
   const sendPasswordReset = useCallback((email: string) => authService.sendPasswordReset(email), []);
+  const refreshUser = useCallback(async () => {
+    setUser(await authService.refreshUser());
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signInWithGoogle, signOut, sendPasswordReset }}>
+    <AuthContext.Provider
+      value={{ user, loading, signUp, signIn, signInWithGoogle, signOut, sendPasswordReset, refreshUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

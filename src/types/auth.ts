@@ -5,6 +5,7 @@ export interface AuthUser {
   email: string;
   displayName: string;
   role: UserRole;
+  photoUrl?: string;
 }
 
 export interface SignUpInput {
@@ -43,4 +44,6 @@ export interface AuthService {
   signInWithGoogle(role: UserRole): Promise<AuthUser>;
   signOutUser(): Promise<void>;
   sendPasswordReset(email: string): Promise<void>;
+  /** Re-reads the current Firebase user's profile (e.g. after a worker updates their photo). */
+  refreshUser(): Promise<AuthUser | null>;
 }

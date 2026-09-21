@@ -1,12 +1,18 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
 import { getWorkerApplications } from '@/lib/firebase/applications';
 import { formatRelativeDate } from '@/lib/utils';
-import type { JobApplication } from '@/types/application';
+import type { JobApplication, ApplicationStatus } from '@/types/application';
+
+const STATUS_BADGE: Record<ApplicationStatus, { label: string; classes: string }> = {
+  applied:     { label: 'Under Review',  classes: 'bg-yellow-50 text-yellow-800 border border-yellow-200' },
+  shortlisted: { label: 'Shortlisted',   classes: 'bg-blue-50 text-blue-800 border border-blue-200' },
+  approved:    { label: 'Approved',      classes: 'bg-green-50 text-green-800 border border-green-200' },
+  rejected:    { label: 'Not Selected',  classes: 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]' },
+};
 
 export default function WorkerApplications({ uid }: { uid: string }) {
   const [applications, setApplications] = useState<JobApplication[] | null>(null);
@@ -38,13 +44,13 @@ export default function WorkerApplications({ uid }: { uid: string }) {
       )}
 
       {!error && applications === null && (
-        <p className="text-sm text-[var(--color-text-secondary)]">Loading…</p>
+        <p className="text-sm text-[var(--color-text-secondary)]">Loading...</p>
       )}
 
       {applications?.length === 0 && (
         <div className="p-6 bg-[var(--color-bg-subtle)] border border-[var(--color-border)] rounded-[var(--radius-lg)]">
           <p className="text-sm text-[var(--color-text-secondary)] mb-3">
-            You haven&apos;t applied to any jobs yet.
+            You have not applied to any jobs yet.
           </p>
           <Button href="/jobs" size="sm">
             Browse Jobs
@@ -54,27 +60,32 @@ export default function WorkerApplications({ uid }: { uid: string }) {
 
       {applications && applications.length > 0 && (
         <ul className="flex flex-col gap-3 list-none p-0 m-0">
-          {applications.map((app) => (
-            <li
-              key={app.id}
-              className="flex items-center justify-between gap-4 p-4 bg-white border border-[var(--color-border)] rounded-[var(--radius-lg)]"
-            >
-              <div className="min-w-0">
-                <Link
-                  href={`/jobs/${app.jobSlug}`}
-                  className="font-medium text-[var(--color-text)] hover:text-[var(--color-primary-dark)] no-underline"
+          {applications.map((app) => {
+            const badge = STATUS_BADGE[app.status] ?? STATUS_BADGE.applied;
+            return (
+              <li
+                key={app.id}
+                className="flex items-center justify-between gap-4 p-4 bg-white border border-[var(--color-border)] rounded-[var(--radius-lg)]"
+              >
+                <div className="min-w-0">
+                  <Link
+                    href={'/jobs/' + app.jobSlug}
+                    className="font-medium text-[var(--color-text)] hover:text-[var(--color-primary-dark)] no-underline"
+                  >
+                    {app.jobTitle}
+                  </Link>
+                  <p className="text-sm text-[var(--color-text-secondary)] truncate">
+                    {app.employerName} · Applied {formatRelativeDate(app.appliedAt)}
+                  </p>
+                </div>
+                <span
+                  className={'text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 ' + badge.classes}
                 >
-                  {app.jobTitle}
-                </Link>
-                <p className="text-sm text-[var(--color-text-secondary)] truncate">
-                  {app.employerName} · Applied {formatRelativeDate(app.appliedAt)}
-                </p>
-              </div>
-              <Badge variant="success" className="flex-shrink-0">
-                Applied
-              </Badge>
-            </li>
-          ))}
+                  {badge.label}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

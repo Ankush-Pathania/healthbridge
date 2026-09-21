@@ -5,10 +5,15 @@ import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import JobDetailView from './JobDetailView';
 import { getPostedJobBySlug } from '@/lib/firebase/jobs';
+import { useAuth } from '@/lib/auth/auth-context';
+import { useSubscription, isWorkerSubscribed } from '@/lib/subscription/subscription-context';
 import type { Job } from '@/types/job';
 
 export default function FirestoreJobDetail({ slug }: { slug: string }) {
   const [job, setJob] = useState<Job | null | undefined>(undefined);
+  const { user } = useAuth();
+  const { subscription } = useSubscription();
+  const locked = !(user?.role === 'worker' && isWorkerSubscribed(subscription));
 
   useEffect(() => {
     getPostedJobBySlug(slug).then(setJob);
@@ -40,5 +45,5 @@ export default function FirestoreJobDetail({ slug }: { slug: string }) {
     );
   }
 
-  return <JobDetailView job={job} />;
+  return <JobDetailView job={job} locked={locked} />;
 }

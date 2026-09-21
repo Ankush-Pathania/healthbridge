@@ -95,3 +95,9 @@ export async function getEmployerJobs(employerUid: string): Promise<Job[]> {
     .map((docSnap) => jobFromDoc(docSnap.id, docSnap.data()))
     .sort((a, b) => b.postedAt.localeCompare(a.postedAt));
 }
+
+/** Client-side gate only (not enforced server-side yet) for the employer free-tier post limit. */
+export async function getEmployerJobCount(employerUid: string): Promise<number> {
+  const snapshot = await getDocs(query(collection(db, 'jobs'), where('employerUid', '==', employerUid)));
+  return snapshot.size;
+}

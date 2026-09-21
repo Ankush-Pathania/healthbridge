@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -36,29 +36,23 @@ export default function EmployerJobs({ uid }: { uid: string }) {
     <div className="mb-6">
       <div className="flex items-center justify-between gap-3 mb-3">
         <h2 className="text-lg font-semibold text-[var(--color-text)]">My Job Posts</h2>
-        <Button href="/jobs/new" size="sm">
-          Post a Job
-        </Button>
+        <Button href="/jobs/new" size="sm">Post a Job</Button>
       </div>
 
       {error && (
-        <p className="text-sm text-[var(--color-error)]" role="alert">
-          {error}
-        </p>
+        <p className="text-sm text-[var(--color-error)]" role="alert">{error}</p>
       )}
 
       {!error && jobs === null && (
-        <p className="text-sm text-[var(--color-text-secondary)]">Loading…</p>
+        <p className="text-sm text-[var(--color-text-secondary)]">Loading...</p>
       )}
 
       {jobs?.length === 0 && (
         <div className="p-6 bg-[var(--color-bg-subtle)] border border-[var(--color-border)] rounded-[var(--radius-lg)]">
           <p className="text-sm text-[var(--color-text-secondary)] mb-3">
-            You haven&apos;t posted a job yet.
+            You have not posted a job yet.
           </p>
-          <Button href="/jobs/new" size="sm">
-            Post a Job
-          </Button>
+          <Button href="/jobs/new" size="sm">Post a Job</Button>
         </div>
       )}
 
@@ -74,7 +68,7 @@ export default function EmployerJobs({ uid }: { uid: string }) {
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div>
                     <Link
-                      href={`/jobs/${job.slug}`}
+                      href={'/jobs/' + job.slug}
                       className="font-medium text-[var(--color-text)] hover:text-[var(--color-primary-dark)] no-underline"
                     >
                       {job.title}
@@ -83,20 +77,39 @@ export default function EmployerJobs({ uid }: { uid: string }) {
                       {job.location.city}, {job.location.provinceCode} · Posted {formatRelativeDate(job.postedAt)}
                     </p>
                   </div>
-                  <Badge variant="primary">{applicants.length} applicant{applicants.length === 1 ? '' : 's'}</Badge>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Badge variant="primary">
+                      {applicants.length} applicant{applicants.length === 1 ? '' : 's'}
+                    </Badge>
+                    <Link
+                      href="/dashboard"
+                      className="text-xs font-medium text-[var(--color-primary-dark)] hover:underline whitespace-nowrap"
+                    >
+                      Manage
+                    </Link>
+                  </div>
                 </div>
+
                 {applicants.length === 0 ? (
                   <p className="text-sm text-[var(--color-text-tertiary)]">No applications yet.</p>
                 ) : (
                   <ul className="flex flex-col gap-2 list-none p-0 m-0 mt-3">
-                    {applicants.map((app) => (
+                    {applicants.slice(0, 3).map((app) => (
                       <li key={app.id} className="text-sm text-[var(--color-text-secondary)]">
                         <span className="font-medium text-[var(--color-text)]">
                           {app.workerName || 'Healthcare worker'}
                         </span>
-                        {app.workerEmail ? ` · ${app.workerEmail}` : ''} · Applied {formatRelativeDate(app.appliedAt)}
+                        {app.workerEmail ? ' · ' + app.workerEmail : ''} · Applied {formatRelativeDate(app.appliedAt)}
                       </li>
                     ))}
+                    {applicants.length > 3 && (
+                      <li className="text-xs text-[var(--color-text-secondary)]">
+                        +{applicants.length - 3} more ·{' '}
+                        <Link href="/dashboard" className="text-[var(--color-primary-dark)] hover:underline">
+                          View all in dashboard
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 )}
               </li>

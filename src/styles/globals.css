@@ -2,21 +2,35 @@
 
 /* ============================================
    HealthBridge Design System
-   Simple. Sober. Trustworthy.
+   Premium. Bold. Clean.
    ============================================ */
 
 /* --- Color Tokens --- */
 :root {
-  /* Primary - Deep Teal */
-  --color-primary: #0F766E;
-  --color-primary-dark: #115E59;
-  --color-primary-light: #F0FDFA;
-  --color-primary-hover: #0D9488;
+  /* Primary - Deep Navy */
+  --color-primary: #171B45;
+  --color-primary-dark: #0F1230;
+  --color-primary-light: #E9EAF3;
+  --color-primary-hover: #22285C;
 
-  /* Accent - Deep Blue (used sparingly) */
-  --color-accent: #0369A1;
-  --color-accent-dark: #075985;
-  --color-accent-light: #F0F9FF;
+  /* Navy anchor (hero / footer backgrounds) */
+  --color-navy: #171B45;
+  --color-navy-dark: #0F1230;
+
+  /* Accent - Coral (high-emphasis CTAs on dark backgrounds) */
+  --color-accent: #FF6F91;
+  --color-accent-dark: #F04E77;
+  --color-accent-light: #FFE9EE;
+
+  /* Pastel accents (homepage bento cards, category color-coding) */
+  --color-pastel-yellow: #FDE68A;
+  --color-pastel-yellow-fg: #78350F;
+  --color-pastel-green: #BBF7D0;
+  --color-pastel-green-fg: #14532D;
+  --color-pastel-pink: #FBCFE8;
+  --color-pastel-pink-fg: #831843;
+  --color-pastel-blue: #BFDBFE;
+  --color-pastel-blue-fg: #1E3A8A;
 
   /* Backgrounds */
   --color-bg: #FFFFFF;
@@ -78,15 +92,17 @@
 
   /* Border Radius */
   --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
   --radius-full: 9999px;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 40px -12px rgba(23, 27, 69, 0.18), 0 8px 16px -8px rgba(23, 27, 69, 0.1);
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -104,7 +120,19 @@
   --color-primary: var(--color-primary);
   --color-primary-dark: var(--color-primary-dark);
   --color-primary-light: var(--color-primary-light);
+  --color-navy: var(--color-navy);
+  --color-navy-dark: var(--color-navy-dark);
   --color-accent: var(--color-accent);
+  --color-accent-dark: var(--color-accent-dark);
+  --color-accent-light: var(--color-accent-light);
+  --color-pastel-yellow: var(--color-pastel-yellow);
+  --color-pastel-yellow-fg: var(--color-pastel-yellow-fg);
+  --color-pastel-green: var(--color-pastel-green);
+  --color-pastel-green-fg: var(--color-pastel-green-fg);
+  --color-pastel-pink: var(--color-pastel-pink);
+  --color-pastel-pink-fg: var(--color-pastel-pink-fg);
+  --color-pastel-blue: var(--color-pastel-blue);
+  --color-pastel-blue-fg: var(--color-pastel-blue-fg);
   --color-bg: var(--color-bg);
   --color-bg-subtle: var(--color-bg-subtle);
   --color-bg-muted: var(--color-bg-muted);
@@ -193,6 +221,16 @@
     background-color: var(--color-primary);
     color: var(--color-text-inverse);
   }
+}
+
+/* --- Utility: Hide Scrollbar (horizontal pill/chip rows) --- */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* --- Utility: Screen Reader Only --- */

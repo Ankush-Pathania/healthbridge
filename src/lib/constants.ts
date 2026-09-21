@@ -37,7 +37,7 @@ export const FOOTER_LINKS = {
   forEmployers: [
     { label: 'Post a Job', href: '/jobs/new' },
     { label: 'Find Workers', href: '/workers' },
-    { label: 'Pricing', href: '/employers' },
+    { label: 'Pricing', href: '/pricing' },
     { label: 'Employer Resources', href: '/employers' },
   ],
   company: [
@@ -108,6 +108,23 @@ export const JOB_CATEGORIES: JobCategoryInfo[] = [
     description: 'Healthcare Assistant positions in hospitals and care facilities.',
   },
 ];
+
+/* ============================================
+   Category Accent Colors (homepage bento cards,
+   JobCard icon chips — one pastel token per category)
+   ============================================ */
+
+export type CategoryAccent = 'yellow' | 'green' | 'pink' | 'blue';
+
+export const CATEGORY_ACCENT: Record<JobCategory, CategoryAccent> = {
+  rn: 'blue',
+  lpn: 'green',
+  rpn: 'pink',
+  psw: 'yellow',
+  caregiver: 'green',
+  'home-support': 'blue',
+  'healthcare-assistant': 'pink',
+};
 
 /* ============================================
    Canadian Provinces & Major Cities

@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'accent';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonBaseProps {
@@ -31,6 +31,8 @@ const variantStyles: Record<ButtonVariant, string> = {
     'bg-transparent text-[var(--color-primary)] border-[var(--color-primary)] hover:bg-[var(--color-primary-light)]',
   ghost:
     'bg-transparent text-[var(--color-text)] border-transparent hover:bg-[var(--color-bg-muted)]',
+  accent:
+    'bg-[var(--color-accent)] text-[var(--color-primary)] hover:bg-[var(--color-accent-dark)] border-transparent',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -48,7 +50,7 @@ export default function Button({
 }: ButtonProps) {
   const baseStyles = cn(
     'inline-flex items-center justify-center gap-2',
-    'font-medium rounded-[var(--radius-md)] border',
+    'font-medium rounded-full border',
     'transition-colors duration-[var(--transition-fast)]',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]',
     'disabled:opacity-50 disabled:pointer-events-none',

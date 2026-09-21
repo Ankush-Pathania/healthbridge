@@ -41,23 +41,37 @@ export default function WorkerProfilesList() {
             key={profile.id}
             className="p-5 bg-white border border-[var(--color-border)] rounded-[var(--radius-lg)]"
           >
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <h3 className="text-base font-semibold text-[var(--color-text)]">{profile.displayName}</h3>
-              <Badge variant={profile.availableForWork ? 'success' : 'default'}>
-                {profile.availableForWork ? 'Available' : 'Not available'}
-              </Badge>
+            <div className="flex items-start gap-3">
+              <div className="w-11 h-11 rounded-full bg-[var(--color-primary-light)] overflow-hidden flex-shrink-0 flex items-center justify-center">
+                {profile.photoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={profile.photoUrl} alt={profile.displayName} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-base font-semibold text-[var(--color-primary-dark)]">
+                    {profile.displayName.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <h3 className="text-base font-semibold text-[var(--color-text)]">{profile.displayName}</h3>
+                  <Badge variant={profile.availableForWork ? 'success' : 'default'}>
+                    {profile.availableForWork ? 'Available' : 'Not available'}
+                  </Badge>
+                </div>
+                <p className="text-sm font-medium text-[var(--color-text)] mb-1">{profile.headline}</p>
+                <p className="text-sm text-[var(--color-text-secondary)] mb-3">
+                  {category?.label || profile.category} · {profile.location.city}, {profile.location.provinceCode} ·{' '}
+                  {profile.experience} yr{profile.experience === 1 ? '' : 's'}
+                </p>
+                <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-3">{profile.summary}</p>
+                {profile.certifications.length > 0 && (
+                  <p className="text-xs text-[var(--color-text-tertiary)]">
+                    {profile.certifications.join(' · ')}
+                  </p>
+                )}
+              </div>
             </div>
-            <p className="text-sm font-medium text-[var(--color-text)] mb-1">{profile.headline}</p>
-            <p className="text-sm text-[var(--color-text-secondary)] mb-3">
-              {category?.label || profile.category} · {profile.location.city}, {profile.location.provinceCode} ·{' '}
-              {profile.experience} yr{profile.experience === 1 ? '' : 's'}
-            </p>
-            <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-3">{profile.summary}</p>
-            {profile.certifications.length > 0 && (
-              <p className="text-xs text-[var(--color-text-tertiary)]">
-                {profile.certifications.join(' · ')}
-              </p>
-            )}
           </li>
         );
       })}

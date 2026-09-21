@@ -1,5 +1,9 @@
+'use client';
+
 import type { Job } from '@/types/job';
 import JobCard from './JobCard';
+import { useAuth } from '@/lib/auth/auth-context';
+import { useSubscription, isWorkerSubscribed } from '@/lib/subscription/subscription-context';
 
 interface JobListProps {
   jobs: Job[];
@@ -8,6 +12,10 @@ interface JobListProps {
 }
 
 export default function JobList({ jobs, title, showCount = true }: JobListProps) {
+  const { user } = useAuth();
+  const { subscription } = useSubscription();
+  const locked = !(user?.role === 'worker' && isWorkerSubscribed(subscription));
+
   return (
     <section>
       {(title || showCount) && (
@@ -35,7 +43,7 @@ export default function JobList({ jobs, title, showCount = true }: JobListProps)
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {jobs.map((job) => (
-            <JobCard key={job.id} job={job} />
+            <JobCard key={job.id} job={job} locked={locked} />
           ))}
         </div>
       )}

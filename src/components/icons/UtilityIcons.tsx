@@ -66,3 +66,14 @@ export function ChevronRightIcon({ className, size = 16 }: IconProps) {
     </svg>
   );
 }
+
+export function GridIcon({ className, size = 24 }: IconProps) {
+  return (
+    <svg {...ICON_BASE_PROPS} width={size} height={size} className={className}>
+      <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+      <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+      <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+      <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+    </svg>
+  );
+}

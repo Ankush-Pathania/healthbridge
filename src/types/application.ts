@@ -1,4 +1,4 @@
-export type ApplicationStatus = 'applied';
+export type ApplicationStatus = 'applied' | 'shortlisted' | 'approved' | 'rejected';
 
 export interface JobApplication {
   id: string;
@@ -12,4 +12,6 @@ export interface JobApplication {
   employerName: string;
   status: ApplicationStatus;
   appliedAt: string;
+  updatedAt?: string;
+  employerNote?: string;
 }

@@ -3,14 +3,15 @@ import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import ApplyButton from '@/components/jobs/ApplyButton';
-import { formatSalary, formatRelativeDate } from '@/lib/utils';
+import { cn, formatSalary, formatRelativeDate } from '@/lib/utils';
 import { JOB_TYPE_LABELS, JOB_CATEGORIES, SHIFT_TYPE_LABELS } from '@/lib/constants';
 import type { Job } from '@/types/job';
 
-export default function JobDetailView({ job }: { job: Job }) {
+export default function JobDetailView({ job, locked = false }: { job: Job; locked?: boolean }) {
   const categoryLabel = JOB_CATEGORIES.find((c) => c.slug === job.category)?.label || job.category;
   const typeLabel = JOB_TYPE_LABELS[job.type] || job.type;
   const shiftLabel = SHIFT_TYPE_LABELS[job.shift] || job.shift;
+  const blurClasses = 'blur-sm select-none pointer-events-none';
 
   return (
     <section className="py-8 sm:py-12">
@@ -56,7 +57,12 @@ export default function JobDetailView({ job }: { job: Job }) {
           </div>
           <div>
             <p className="text-xs text-[var(--color-text-tertiary)] mb-0.5">Salary</p>
-            <p className="text-sm font-medium text-[var(--color-text)]">{formatSalary(job.salary)}</p>
+            <p
+              className={cn('text-sm font-medium text-[var(--color-text)]', locked && 'blur-sm select-none')}
+              aria-hidden={locked || undefined}
+            >
+              {formatSalary(job.salary)}
+            </p>
           </div>
           <div>
             <p className="text-xs text-[var(--color-text-tertiary)] mb-0.5">Shift</p>
@@ -64,15 +70,34 @@ export default function JobDetailView({ job }: { job: Job }) {
           </div>
         </div>
 
+        {locked && (
+          <div className="mb-8 p-4 bg-[var(--color-pastel-yellow)] rounded-[var(--radius-lg)] flex items-center justify-between gap-4 flex-wrap">
+            <p className="text-sm font-medium text-[var(--color-pastel-yellow-fg)]">
+              Subscribe as a worker to unlock the full job description, requirements, and benefits.
+            </p>
+            <Button href="/pricing" variant="primary" size="sm">
+              Subscribe to unlock →
+            </Button>
+          </div>
+        )}
+
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-[var(--color-text)] mb-3">About This Role</h2>
-          <p className="text-[var(--color-text-secondary)] leading-relaxed">{job.description}</p>
+          <p
+            className={cn('text-[var(--color-text-secondary)] leading-relaxed', locked && blurClasses)}
+            aria-hidden={locked || undefined}
+          >
+            {job.description}
+          </p>
         </div>
 
         {job.requirements.length > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-[var(--color-text)] mb-3">Requirements</h2>
-            <ul className="flex flex-col gap-2 list-none p-0 m-0">
+            <ul
+              className={cn('flex flex-col gap-2 list-none p-0 m-0', locked && blurClasses)}
+              aria-hidden={locked || undefined}
+            >
               {job.requirements.map((req) => (
                 <li key={req} className="flex items-start gap-2 text-[var(--color-text-secondary)]">
                   <span className="text-[var(--color-primary)] mt-1 flex-shrink-0">•</span>
@@ -86,7 +111,10 @@ export default function JobDetailView({ job }: { job: Job }) {
         {job.benefits.length > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-[var(--color-text)] mb-3">Benefits</h2>
-            <ul className="flex flex-col gap-2 list-none p-0 m-0">
+            <ul
+              className={cn('flex flex-col gap-2 list-none p-0 m-0', locked && blurClasses)}
+              aria-hidden={locked || undefined}
+            >
               {job.benefits.map((benefit) => (
                 <li key={benefit} className="flex items-start gap-2 text-[var(--color-text-secondary)]">
                   <span className="text-[var(--color-success)] mt-1 flex-shrink-0">✓</span>
@@ -109,7 +137,13 @@ export default function JobDetailView({ job }: { job: Job }) {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <ApplyButton job={job} />
+          {locked ? (
+            <Button variant="primary" size="lg" href="/pricing">
+              Subscribe to Apply →
+            </Button>
+          ) : (
+            <ApplyButton job={job} />
+          )}
           <Button variant="secondary" size="lg" href="/jobs">
             ← Back to Jobs
           </Button>

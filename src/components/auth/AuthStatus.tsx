@@ -53,8 +53,13 @@ export default function AuthStatus() {
         aria-expanded={open}
         aria-haspopup="true"
       >
-        <span className="w-8 h-8 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] flex items-center justify-center text-sm font-semibold flex-shrink-0">
-          {user.displayName.charAt(0).toUpperCase()}
+        <span className="w-8 h-8 rounded-full bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] flex items-center justify-center text-sm font-semibold flex-shrink-0 overflow-hidden">
+          {user.photoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={user.photoUrl} alt={user.displayName} className="w-full h-full object-cover" />
+          ) : (
+            user.displayName.charAt(0).toUpperCase()
+          )}
         </span>
         <span className="max-w-[120px] truncate">{user.displayName}</span>
       </button>
@@ -72,6 +77,16 @@ export default function AuthStatus() {
           >
             Account
           </Link>
+          {user.role === 'employer' && (
+            <Link
+              href="/dashboard"
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-bg-muted)] no-underline"
+              role="menuitem"
+            >
+              Dashboard
+            </Link>
+          )}
           <Link
             href={user.role === 'employer' ? '/jobs/new' : '/workers/profile'}
             onClick={() => setOpen(false)}
