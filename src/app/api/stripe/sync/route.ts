@@ -17,8 +17,11 @@ export async function POST(req: Request) {
   }
 
   let uid: string;
+  let email: string | undefined;
   try {
-    uid = (await getAdminAuth().verifyIdToken(idToken)).uid;
+    const decoded = await getAdminAuth().verifyIdToken(idToken);
+    uid = decoded.uid;
+    email = decoded.email;
   } catch (err) {
     console.error('[api/stripe/sync] Auth verification error:', err);
     return NextResponse.json({ error: 'Invalid session.' }, { status: 401 });
@@ -26,12 +29,62 @@ export async function POST(req: Request) {
 
   try {
     const stripe = getStripe();
-    const subs = await stripe.subscriptions.list({ limit: 10 });
-    const userSub = subs.data.find((s) => s.metadata?.uid === uid && (s.status === 'active' || s.status === 'trialing'));
+    const db = getAdminDb();
+    const subRef = db.collection('subscriptions').doc(uid);
+    const docSnap = await subRef.get();
 
-    if (userSub) {
-      const plan = (userSub.metadata?.plan as SubscriptionPlan) || 'worker';
-      const billingCycle = (userSub.metadata?.billingCycle as BillingCycle) || 'monthly';
+    let customerId = docSnap.exists ? (docSnap.data()?.stripeCustomerId as string | undefined) : undefined;
+
+    // 1. Find customer ID in Stripe by email or metadata if not in Firestore
+    if (!customerId) {
+      if (email) {
+        const customersByEmail = await stripe.customers.list({ email, limit: 5 });
+        if (customersByEmail.data.length > 0) {
+          customerId = customersByEmail.data[0].id;
+        }
+      }
+      if (!customerId) {
+        const allCustomers = await stripe.customers.list({ limit: 100 });
+        const matched = allCustomers.data.find(
+          (c) => c.metadata?.uid === uid || (email && c.email === email)
+        );
+        if (matched) customerId = matched.id;
+      }
+    }
+
+    let activeSub: Stripe.Subscription | undefined = undefined;
+
+    // 2. Search subscriptions specifically for this customer
+    if (customerId) {
+      const customerSubs = await stripe.subscriptions.list({ customer: customerId, limit: 10 });
+      // Find active, trialing, or completed subscription
+      activeSub = customerSubs.data.find(
+        (s) => s.status === 'active' || s.status === 'trialing' || s.status === 'incomplete'
+      );
+    }
+
+    // 3. Fallback: Search all recent subscriptions across Stripe account matching uid metadata
+    if (!activeSub) {
+      const recentSubs = await stripe.subscriptions.list({ limit: 100 });
+      activeSub = recentSubs.data.find(
+        (s) =>
+          (s.metadata?.uid === uid || (customerId && s.customer === customerId)) &&
+          (s.status === 'active' || s.status === 'trialing' || s.status === 'incomplete')
+      );
+    }
+
+    // 4. Fallback: Check completed checkout sessions for customer
+    if (!activeSub && customerId) {
+      const sessions = await stripe.checkout.sessions.list({ customer: customerId, limit: 10 });
+      const completedSession = sessions.data.find((s) => s.status === 'complete' && s.subscription);
+      if (completedSession && typeof completedSession.subscription === 'string') {
+        activeSub = await stripe.subscriptions.retrieve(completedSession.subscription);
+      }
+    }
+
+    if (activeSub) {
+      const plan = (activeSub.metadata?.plan as SubscriptionPlan) || 'worker';
+      const billingCycle = (activeSub.metadata?.billingCycle as BillingCycle) || 'monthly';
       const status: SubscriptionStatus = 'active';
 
       const data = {
@@ -39,14 +92,13 @@ export async function POST(req: Request) {
         plan,
         billingCycle,
         status,
-        stripeCustomerId: typeof userSub.customer === 'string' ? userSub.customer : userSub.customer.id,
-        stripeSubscriptionId: userSub.id,
-        currentPeriodEnd: periodEndIso(userSub),
+        stripeCustomerId: typeof activeSub.customer === 'string' ? activeSub.customer : activeSub.customer.id,
+        stripeSubscriptionId: activeSub.id,
+        currentPeriodEnd: periodEndIso(activeSub),
         updatedAt: new Date().toISOString(),
       };
 
-      await getAdminDb().collection('subscriptions').doc(uid).set(data, { merge: true });
-
+      await subRef.set(data, { merge: true });
       return NextResponse.json({ synced: true, subscription: data });
     }
 

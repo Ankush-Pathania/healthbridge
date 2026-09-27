@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { NAV_LINKS, SITE_NAME } from '@/lib/constants';
+import { SITE_NAME } from '@/lib/constants';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/lib/auth/auth-context';
 
@@ -29,7 +29,6 @@ export default function MobileNav() {
     }
 
     document.addEventListener('keydown', handleKeyDown);
-    // Prevent body scroll
     document.body.style.overflow = 'hidden';
 
     return () => {
@@ -37,6 +36,30 @@ export default function MobileNav() {
       document.body.style.overflow = '';
     };
   }, [isOpen, close]);
+
+  const navLinks = !user
+    ? [
+        { label: 'Jobs', href: '/jobs' },
+        { label: 'For Workers', href: '/workers' },
+        { label: 'For Employers', href: '/employers' },
+        { label: 'Locations', href: '/locations' },
+        { label: 'About', href: '/about' },
+      ]
+    : user.role === 'employer'
+      ? [
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Find Candidates', href: '/workers' },
+          { label: 'Pricing', href: '/pricing' },
+          { label: 'Locations', href: '/locations' },
+          { label: 'About', href: '/about' },
+        ]
+      : [
+          { label: 'Browse Jobs', href: '/jobs' },
+          { label: 'My Profile', href: '/workers/profile' },
+          { label: 'Pricing', href: '/pricing' },
+          { label: 'Locations', href: '/locations' },
+          { label: 'About', href: '/about' },
+        ];
 
   return (
     <div className="md:hidden">
@@ -93,7 +116,7 @@ export default function MobileNav() {
           {/* Navigation Links */}
           <nav className="flex-1 px-4 py-4" aria-label="Mobile navigation">
             <ul className="flex flex-col gap-1 list-none p-0 m-0">
-              {NAV_LINKS.map((link) => (
+              {navLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -138,12 +161,24 @@ export default function MobileNav() {
 
           {/* CTA Buttons */}
           <div className="px-4 py-4 border-t border-[var(--color-border)] flex flex-col gap-2">
-            <Button href="/jobs" size="md" onClick={close}>
-              Find a Job
-            </Button>
-            <Button href="/employers" variant="secondary" size="md" onClick={close}>
-              Post a Job
-            </Button>
+            {!user ? (
+              <>
+                <Button href="/jobs" size="md" onClick={close}>
+                  Find a Job
+                </Button>
+                <Button href="/employers" variant="secondary" size="md" onClick={close}>
+                  Post a Job
+                </Button>
+              </>
+            ) : user.role === 'employer' ? (
+              <Button href="/jobs/new" size="md" onClick={close}>
+                Post a Job
+              </Button>
+            ) : (
+              <Button href="/jobs" size="md" onClick={close}>
+                Find a Job
+              </Button>
+            )}
           </div>
         </div>
       </div>

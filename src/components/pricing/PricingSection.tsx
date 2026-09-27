@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
+import Loader from '@/components/ui/Loader';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useSubscription, isWorkerSubscribed, isEmployerSubscribed } from '@/lib/subscription/subscription-context';
 import { auth } from '@/lib/firebase/config';
@@ -75,15 +76,20 @@ export default function PricingSection() {
         return;
       }
       setError(data.error ?? 'Could not start checkout.');
+      setLoadingPlan(null);
     } catch {
       setError('Could not start checkout. Please try again.');
-    } finally {
       setLoadingPlan(null);
     }
   }
 
   return (
-    <div>
+    <div className="relative">
+      {/* Full-screen Loader Overlay during Checkout Redirect */}
+      {loadingPlan && (
+        <Loader size="full" text="Connecting to Stripe Checkout…" />
+      )}
+
       <div className="flex justify-center mb-8">
         <div className="inline-flex p-1 bg-[var(--color-bg-muted)] rounded-full">
           {(['monthly', 'annual'] as BillingCycle[]).map((cycle) => (
@@ -146,10 +152,11 @@ export default function PricingSection() {
                   variant="primary"
                   size="lg"
                   className="w-full"
-                  disabled={loadingPlan === plan.key}
+                  loading={loadingPlan === plan.key}
+                  disabled={loadingPlan !== null}
                   onClick={() => handleSubscribe(plan.key)}
                 >
-                  {loadingPlan === plan.key ? 'Redirecting…' : `Subscribe ${billingCycle === 'monthly' ? 'Monthly' : 'Annually'}`}
+                  {loadingPlan === plan.key ? 'Redirecting to Stripe…' : `Subscribe ${billingCycle === 'monthly' ? 'Monthly' : 'Annually'}`}
                 </Button>
               )}
             </div>

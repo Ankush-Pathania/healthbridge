@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import Loader from '@/components/ui/Loader';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'accent';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -8,6 +9,7 @@ interface ButtonBaseProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
   className?: string;
+  loading?: boolean;
   children: React.ReactNode;
 }
 
@@ -45,6 +47,7 @@ export default function Button({
   variant = 'primary',
   size = 'md',
   className,
+  loading = false,
   children,
   ...props
 }: ButtonProps) {
@@ -55,9 +58,19 @@ export default function Button({
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]',
     'disabled:opacity-50 disabled:pointer-events-none',
     'cursor-pointer',
+    loading && 'pointer-events-none opacity-80',
     variantStyles[variant],
     sizeStyles[size],
     className
+  );
+
+  const content = loading ? (
+    <>
+      <Loader size="sm" />
+      <span>{children}</span>
+    </>
+  ) : (
+    children
   );
 
   if ('href' in props && props.href) {
@@ -65,21 +78,21 @@ export default function Button({
     if (target === '_blank' || href.startsWith('http')) {
       return (
         <a href={href} target={target} rel={rel || 'noopener noreferrer'} className={baseStyles} {...rest}>
-          {children}
+          {content}
         </a>
       );
     }
     return (
       <Link href={href} className={baseStyles} {...rest}>
-        {children}
+        {content}
       </Link>
     );
   }
 
-  const { ...buttonProps } = props as ButtonAsButton;
+  const { disabled, ...buttonProps } = props as ButtonAsButton;
   return (
-    <button className={baseStyles} {...buttonProps}>
-      {children}
+    <button className={baseStyles} disabled={disabled || loading} {...buttonProps}>
+      {content}
     </button>
   );
 }

@@ -1,6 +1,6 @@
+import Image from 'next/image';
 import Container from '@/components/ui/Container';
 import JobSearch from '@/components/jobs/JobSearch';
-import HeroIllustration from './illustrations/HeroIllustration';
 import { JOB_CATEGORIES, PROVINCES } from '@/lib/constants';
 
 const STATS = [
@@ -12,7 +12,7 @@ const STATS = [
 export default function Hero() {
   return (
     <section className="px-4 sm:px-6 lg:px-8 pt-6">
-      <div className="relative overflow-hidden bg-[var(--color-navy)] rounded-[var(--radius-2xl)] py-16 sm:py-24">
+      <div className="relative overflow-hidden bg-[var(--color-navy)] rounded-[var(--radius-2xl)] py-12 sm:py-20">
         {/* Decorative pastel blobs */}
         <div className="pointer-events-none absolute inset-0" aria-hidden="true">
           <div className="absolute -top-20 -right-16 w-72 h-72 rounded-full bg-[var(--color-pastel-yellow)] opacity-20 blur-3xl" />
@@ -48,7 +48,16 @@ export default function Hero() {
             </div>
 
             <div className="order-1 lg:order-2 flex justify-center">
-              <HeroIllustration className="w-56 sm:w-72 lg:w-full max-w-[420px]" />
+              <div className="relative w-full max-w-[480px] rounded-[var(--radius-xl)] overflow-hidden border-2 border-white/10 shadow-2xl transition-transform hover:scale-[1.01] duration-300">
+                <Image
+                  src="/hero-banner.jpg"
+                  alt="HealthBridge Canadian Healthcare Professionals"
+                  width={960}
+                  height={720}
+                  priority
+                  className="w-full h-auto object-cover rounded-[var(--radius-xl)]"
+                />
+              </div>
             </div>
           </div>
         </Container>

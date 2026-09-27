@@ -1,6 +1,6 @@
 export type SubscriptionPlan = 'worker' | 'employer';
 export type BillingCycle = 'monthly' | 'annual';
-export type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'incomplete';
+export type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'incomplete';
 
 export interface Subscription {
   uid: string;

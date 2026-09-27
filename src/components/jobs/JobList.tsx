@@ -2,7 +2,6 @@
 
 import type { Job } from '@/types/job';
 import JobCard from './JobCard';
-import { useAuth } from '@/lib/auth/auth-context';
 import { useSubscription, isWorkerSubscribed } from '@/lib/subscription/subscription-context';
 
 interface JobListProps {
@@ -12,9 +11,8 @@ interface JobListProps {
 }
 
 export default function JobList({ jobs, title, showCount = true }: JobListProps) {
-  const { user } = useAuth();
   const { subscription } = useSubscription();
-  const locked = !(user?.role === 'worker' && isWorkerSubscribed(subscription));
+  const locked = !isWorkerSubscribed(subscription);
 
   return (
     <section>
